@@ -10,7 +10,10 @@ import retrofit2.http.Query
 
 interface GetDataApi {
     @GET("/products")
-    suspend fun getProducts(@Query("skip") skip:String,@Query("limit") limit:Int,@Query("search") search:String): Response<Products>
+    suspend fun getProducts(@Query("skip") skip:Int,@Query("limit") limit:Int): Response<Products>
+
+    @GET("/products/search")
+    suspend fun getProductsSearch(@Query("q") search:String): Response<Products>
 
 //    @GET("/api/materials")
 //    suspend fun getMaterials(@Header("Authorization") token:String,@Query("search") search:String): Response<Materials>

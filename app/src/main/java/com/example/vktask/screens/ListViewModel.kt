@@ -31,6 +31,9 @@ class ListViewModel  @Inject constructor(
     private val _dataListProduct = MutableStateFlow<List<Product>>(emptyList())
     val dataListProduct: StateFlow<List<Product>> = _dataListProduct.asStateFlow()
 
+    private val _dataListProductSearch = MutableStateFlow<List<Product>>(emptyList())
+    val dataListProductSearch: StateFlow<List<Product>> = _dataListProductSearch.asStateFlow()
+
     private val _isLoading = MutableStateFlow(false)
     val isLoading = _isLoading.asStateFlow()
 
@@ -46,20 +49,13 @@ class ListViewModel  @Inject constructor(
 
     private fun getListProducts(searchText:String, skip: Int,limit:Int , context: Context, onSearch:Boolean) {
         viewModelScope.launch {
-            _isLoading.value = !onSearch
+            _isLoading.value = true
             _productsState.value = GetStateList.Loading
             uiCheckStatus.value = StatusUI("Loading", "Loading")
             try {
                 Log.d("getListTasks", "3")
-                val response = mainApi.getProducts("$skip&amp",limit,searchText)
+                val response = if (onSearch) mainApi.getProductsSearch(searchText)  else mainApi.getProducts(skip,limit)
                 if (response.isSuccessful) {
-                    if(!onSearch) {
-                        Toast.makeText(
-                            context,
-                            "Success",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
                     _isLoading.value = false
                     Log.d("getListTasks", "4")
                     uiCheckStatus.value = StatusUI("Success", "Success")
@@ -69,11 +65,11 @@ class ListViewModel  @Inject constructor(
                     _isLoading.value = false
                     Toast.makeText(
                         context,
-                        "Login failed",
+                        "Error",
                         Toast.LENGTH_SHORT
                     ).show()
-                    _productsState.value = GetStateList.Error("Login failed")
-                    uiCheckStatus.value = StatusUI("Error", "Login failed")
+                    _productsState.value = GetStateList.Error("Error")
+                    uiCheckStatus.value = StatusUI("Error", "Error")
 
                 }
             } catch (e: Exception) {
@@ -94,5 +90,14 @@ class ListViewModel  @Inject constructor(
 
     fun nullStatus() {
         uiCheckStatus.value = StatusUI()
+    }
+    fun setDataList(state: GetStateList.Success){
+        val products= state.products.products
+        if (state.onSearch){
+            _dataListProductSearch.value=products
+        }
+        else {
+            _dataListProduct.value = products
+        }
     }
 }

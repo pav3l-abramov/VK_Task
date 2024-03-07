@@ -5,15 +5,15 @@ data class Products(
 )
 
 data class Product(
-    val id :Int?=null,
-    val title :String?=null,
-    val description :String?=null,
-    val price :Int?=null,
+    val id :Int,
+    val title :String,
+    val description :String,
+    val price :Int,
     val discountPercentage :Float?=null,
     val rating :Float?=null,
     val stock :Int?=null,
     val brand :String?=null,
     val category :String?=null,
-    val thumbnail :String?=null,
+    val thumbnail :String,
     val images :List<String>?=null
 )
