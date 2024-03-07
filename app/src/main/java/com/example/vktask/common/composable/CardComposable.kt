@@ -14,6 +14,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -178,20 +179,35 @@ private fun TaskCardMain(
     }
 }
 
+data class dataToItemScreen(
+    val name : String,
+    val properties : String
+)
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CardDetail(
-    modifier: Modifier,
     product: Product
 ) {
+    val listItemProduct = listOf(
+        dataToItemScreen("Description: ", product.description),
+        dataToItemScreen("Price: ", product.price.toString()),
+        dataToItemScreen("Discount: ", product.discountPercentage.toString()),
+        dataToItemScreen("Rating: ", product.rating.toString()),
+        dataToItemScreen("Stock: ", product.stock.toString()),
+        dataToItemScreen("Brand: ", product.brand.toString()),
+        dataToItemScreen("Category: ", product.category.toString())
+    )
     Column(Modifier.fillMaxSize()) {
         Card(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxWidth()
-                .height(200.dp),){
+                .height(300.dp),){
                 product.images?.let { ImageSlider(it) }
         }
-
+        listItemProduct.forEach{
+            TaskDetailCard(it.name,it.properties)
+        }
 
 
     }
@@ -263,25 +279,72 @@ fun DrawImage(
     }
 }
 
+@Composable
+fun TaskDetailCard(
+    contentFirst: String,
+    contentSecond: String
+) {
+    Card(
+        modifier = Modifier.padding(0.dp,2.dp)
+    ) {
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(2.dp, Color.Gray, shape = RoundedCornerShape(10.dp))
+                    .padding(16.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .width(100.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.Start
+                ) {
+
+                    Text(
+                        text = contentFirst,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                Column(
+                    modifier = Modifier,
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    if (contentSecond != "null") {
+                            Text(
+                                text = contentSecond,
+                            )
+
+                    } else {
+                        Text(
+                            text = "no data"
+                        )
+                    }
+                }
+            }
+        }
+
+}
 
 
-//@Preview
-//@Composable
-//fun qeqq() {
-//    CardDetail(
-//        product = Product(
-//            1,
-//            "title",
-//            "description",
-//            100,
-//            10f,
-//            3f,
-//            10,
-//            "brand",
-//            "category",
-//            "thumbnail",
-//            listOf("", "")
-//        ),
-//        modifier = Modifier.fieldModifier()
-//    )
-//}
+@Preview
+@Composable
+fun qeqq() {
+    CardDetail(
+        product = Product(
+            1,
+            "title",
+            "description",
+            100,
+            10f,
+            3f,
+            10,
+            "brand",
+            "category",
+            "thumbnail",
+            listOf("", "")
+        )
+    )
+}

@@ -68,8 +68,7 @@ fun OpenItemScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             )
             {
-                CardDetail(modifier = Modifier.fieldModifier(), product = dataProduct)
-                Text(text = dataProduct.toString())
+                CardDetail( product = dataProduct)
             }
         })
 
