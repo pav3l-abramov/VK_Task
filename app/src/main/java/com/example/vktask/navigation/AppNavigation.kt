@@ -20,6 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
@@ -32,42 +33,48 @@ import com.example.vktask.OPEN_ITEM_SCREEN
 import com.example.vktask.screens.HomeScreen
 import com.example.vktask.screens.ListScreen
 import com.example.vktask.screens.OpenItemScreen
+import com.example.vktask.screens.SharedViewModel
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun AppNavigation(context:Context) {
+fun AppNavigation(context: Context) {
     val navController = rememberNavController()
+    val viewModel: SharedViewModel = hiltViewModel()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
     Scaffold(
         bottomBar = {
             if (currentDestination != null) {
-                if(currentDestination.route?.contains(OPEN_ITEM_SCREEN, ignoreCase = true) == false){
-            NavigationBar {
-                screens.forEach { navItem ->
-                    NavigationBarItem(selected = currentDestination.hierarchy.any { it.route == navItem.route },
-                        onClick = {
-                            navController.navigate(navItem.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        },
-                        icon = {
-                            Icon(
-                                painter = painterResource(id = navItem.icon),
-                                contentDescription = null
+                if (currentDestination.route?.contains(
+                        OPEN_ITEM_SCREEN,
+                        ignoreCase = true
+                    ) == false
+                ) {
+                    NavigationBar {
+                        screens.forEach { navItem ->
+                            NavigationBarItem(selected = currentDestination.hierarchy.any { it.route == navItem.route },
+                                onClick = {
+                                    navController.navigate(navItem.route) {
+                                        popUpTo(navController.graph.findStartDestination().id) {
+                                            saveState = true
+                                        }
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
+                                },
+                                icon = {
+                                    Icon(
+                                        painter = painterResource(id = navItem.icon),
+                                        contentDescription = null
+                                    )
+                                },
+                                label = { Text(text = navItem.title) }
                             )
-                        },
-                        label = { Text(text = navItem.title) }
-                    )
+                        }
+                    }
                 }
-            }
-        }
             }
         }
     ) { paddingValues ->
@@ -78,20 +85,15 @@ fun AppNavigation(context:Context) {
         ) {
 
             composable(route = BottomBarScreen.Home.route) {
-                 HomeScreen()
+                HomeScreen()
 
             }
 
             composable(route = BottomBarScreen.List.route) {
-                EnterAnimation{ListScreen(navController = navController, context = context)}
+                EnterAnimation { ListScreen(navController = navController, context = context,viewModel=viewModel) }
             }
-            composable(route = "$OPEN_ITEM_SCREEN/{id}", arguments = listOf(
-                navArgument(name = "id") {
-                    type = NavType.IntType
-                }
-            )) { idTask ->
-                idTask.arguments?.getInt("id")
-                    ?.let {  EnterAnimation{ OpenItemScreen(idItem = it) }}
+            composable(route = OPEN_ITEM_SCREEN) {
+                EnterAnimation { OpenItemScreen(navController = navController,viewModel=viewModel) }
             }
 
         }
@@ -99,6 +101,7 @@ fun AppNavigation(context:Context) {
     }
 
 }
+
 @Composable
 fun EnterAnimation(content: @Composable () -> Unit) {
     AnimatedVisibility(
@@ -111,7 +114,7 @@ fun EnterAnimation(content: @Composable () -> Unit) {
         ) + expandVertically(
             expandFrom = Alignment.Top
         ) + fadeIn(initialAlpha = 0.0f),
-        exit = slideOutVertically()  + fadeOut(),
+        exit = slideOutVertically() + fadeOut(),
     ) {
         content()
     }

@@ -1,6 +1,7 @@
 package com.example.vktask.retrofit
 
 
+import com.example.vktask.data.CategoriesData
 import com.example.vktask.data.Products
 import retrofit2.Response
 import retrofit2.http.GET
@@ -16,12 +17,7 @@ interface GetDataApi {
     suspend fun getProductsSearch(@Query("q") search:String): Response<Products>
 
     @GET("/products/categories")
-    suspend fun getCategories(): Response<Products>
+    suspend fun getCategories(): Response<CategoriesData>
 
-//    @GET("/api/materials")
-//    suspend fun getMaterials(@Header("Authorization") token:String,@Query("search") search:String): Response<Materials>
-//
-//    @GET("/api/materials/{id}")
-//    suspend fun getMaterialDetails(@Header("Authorization") token:String, @Path("id") id:Int): Response<MaterialDetails>
 }
 

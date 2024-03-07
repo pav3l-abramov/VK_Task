@@ -1,5 +1,7 @@
 package com.example.vktask.common.composable
 
+import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -30,7 +32,10 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -44,11 +49,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -60,6 +67,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.example.vktask.common.ext.fieldModifier
+import com.example.vktask.data.Product
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -75,8 +83,10 @@ fun ProductCard(
     price: Int,
     onEditClick: () -> Unit
 ) {
-    TaskCardMain(content,imgUrl,description, price, onEditClick, modifier)
+    TaskCardMain(content, imgUrl, description, price, onEditClick, modifier)
 }
+
+@SuppressLint("SuspiciousIndentation")
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 private fun TaskCardMain(
@@ -87,134 +97,144 @@ private fun TaskCardMain(
     onEditClick: () -> Unit,
     modifier: Modifier
 ) {
-    val scrollState = rememberScrollState()
     Card(
         modifier = modifier
             .fillMaxWidth()
             .height(100.dp),
         onClick = onEditClick
     ) {
-        val infiniteTransition = rememberInfiniteTransition()
-        val scroll by infiniteTransition.animateFloat(
-            initialValue = 0f,
-            targetValue = 1f,
-            animationSpec = infiniteRepeatable(
-                animation = tween(5000, easing = LinearEasing),
-                repeatMode = RepeatMode.Reverse
-            ), label = ""
-        )
-            Row(
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+            Column(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .fillMaxHeight()
+                    .width(100.dp)
+                    .padding(10.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.Start
             ) {
-                Column(
+                DrawImage(content = imgUrl, modifier = Modifier)
+            }
+            Column(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth()
+            ) {
+                val listStateContent = rememberLazyGridState()
+                Row(
                     modifier = Modifier
-                        .fillMaxHeight()
-                        .width(100.dp)
-                        .padding(10.dp),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.Start
+                        .fillMaxWidth()
+                        .height(20.dp)
                 ) {
-                    DrawImage(content = imgUrl, modifier = Modifier)
-                }
-
-//                Column(
-//
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .padding(8.dp)
-//
-//                ) {
-//                    Row(
-//                        verticalAlignment = Alignment.Top,
-//                        horizontalArrangement = Arrangement.Start,
-//                        modifier = Modifier
-//                            .fillMaxWidth()
-//                    ) {
-//                        if (content.isNotBlank()) {
-//                            Text(
-//                                text = content,
-//                                modifier = Modifier.padding(12.dp),
-//                                fontWeight = FontWeight.Bold
-//                            )
-//
-//                        }
-//                        Row(
-//                            verticalAlignment = Alignment.Bottom,
-//                            horizontalArrangement = Arrangement.End,
-//                            modifier = Modifier
-//                                .fillMaxWidth()
-//                        ) {
-//                            Text(
-//                                text = "$price$",
-//
-//
-//                                fontWeight = FontWeight.Bold
-//                            )
-//                        }
-//                    }
-//
-//                }
-                Column(
-                    modifier = Modifier.padding(16.dp).fillMaxWidth()
-                ) {
-                    val listStateContent = rememberLazyGridState()
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(20.dp)
+                    LazyHorizontalGrid(
+                        state = listStateContent,
+                        rows = GridCells.Fixed(1)
                     ) {
-                        LazyHorizontalGrid(
-                            state = listStateContent,
-                            rows = GridCells.Fixed(1)
-                        ) {
-                            item {
-                                Text(
-                                    text = content,
-                                    fontWeight = FontWeight.Bold,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            }
+                        item {
+                            Text(
+                                text = content,
+                                fontWeight = FontWeight.Bold,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
                         }
                     }
-                    val listStateDescription = rememberLazyGridState()
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(20.dp)
+                }
+                val listStateDescription = rememberLazyGridState()
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(20.dp)
+                ) {
+                    LazyHorizontalGrid(
+                        state = listStateDescription,
+                        rows = GridCells.Fixed(1)
                     ) {
-                        LazyHorizontalGrid(
-                            state = listStateDescription,
-                            rows = GridCells.Fixed(1)
-                        ) {
-                            item {
-                                Text(
-                                    text = description,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                    color = Color.Gray
-                                )
-                            }
+                        item {
+                            Text(
+                                text = description,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                color = Color.Gray
+                            )
                         }
                     }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                                horizontalArrangement = Arrangement.End,
-                    ) {
-                        Text(
-                            text = "$price$"
-                        )
-                    }
-
-
                 }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                ) {
+                    Text(
+                        text = "$price$"
+                    )
+                }
+
+
             }
         }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun CardDetail(
+    modifier: Modifier,
+    product: Product
+) {
+    Column(Modifier.fillMaxSize()) {
+        Card(
+            modifier = modifier
+                .fillMaxWidth()
+                .height(200.dp),){
+                product.images?.let { ImageSlider(it) }
+        }
+
+
+
+    }
+
 }
 
 
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun ImageSlider(images: List<String>) {
+    val pagerState = rememberPagerState(pageCount = {
+        images.size
+    })
+    HorizontalPager(state = pagerState) { page ->
+        DrawImageDetail(images[page], Modifier)
+    }
+}
+@Composable
+fun DrawImageDetail(
+    content: String,
+    modifier: Modifier
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.Start
+    ) {
+        Card(
+            modifier = modifier.fillMaxSize()
+
+        ) {
+            Image(
+                painter = rememberAsyncImagePainter(content),
+                contentDescription = "image",
+                modifier = modifier
+                    .fillMaxSize()
+                    .clip(shape = RectangleShape),
+                contentScale = ContentScale.Crop
+            )
+        }
+    }
+}
 
 @Composable
 fun DrawImage(
@@ -227,31 +247,41 @@ fun DrawImage(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.Start
     ) {
-    Card(
-        modifier = modifier.fillMaxSize()
+        Card(
+            modifier = modifier.fillMaxSize()
 
-    ) {
-        Image(
-            painter = rememberAsyncImagePainter(content),
-            contentDescription = "image",
-                    modifier = modifier
-                        .fillMaxSize()
-                .clip(shape = CircleShape),
-            contentScale = ContentScale.Crop
-        )
+        ) {
+            Image(
+                painter = rememberAsyncImagePainter(content),
+                contentDescription = "image",
+                modifier = modifier
+                    .fillMaxSize()
+                    .clip(shape = CircleShape),
+                contentScale = ContentScale.Crop
+            )
+        }
     }
 }
-}
 
-@Preview
-@Composable
-fun qeqq(){
-    TaskCardMain(
-        content="content",
-        imgUrl="https://cdn.dummyjson.com/product-images/41/thumbnail.webp",
-        description="descriptiondescriptiondescriptiondescriptiondescriptiondescription",
-        price=12121,
-    modifier= Modifier.fieldModifier(),
-        onEditClick = {}
-    )
-}
+
+
+//@Preview
+//@Composable
+//fun qeqq() {
+//    CardDetail(
+//        product = Product(
+//            1,
+//            "title",
+//            "description",
+//            100,
+//            10f,
+//            3f,
+//            10,
+//            "brand",
+//            "category",
+//            "thumbnail",
+//            listOf("", "")
+//        ),
+//        modifier = Modifier.fieldModifier()
+//    )
+//}

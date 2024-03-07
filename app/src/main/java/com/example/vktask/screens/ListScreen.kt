@@ -47,7 +47,8 @@ fun ListScreen(
     navController: NavController,
     modifier: Modifier = Modifier,
     context: Context,
-    listViewModel: ListViewModel= hiltViewModel()
+    listViewModel: ListViewModel= hiltViewModel(),
+    viewModel : SharedViewModel
 ) {
     val isActiveSearch = remember { mutableStateOf(false) }
     val lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current
@@ -114,7 +115,8 @@ fun ListScreen(
                                 price = item.price,
                                 description = item.description
                             ) {
-                                navController.navigate(route = OPEN_ITEM_SCREEN + "/${item.id}")
+                                viewModel.setData(item)
+                                navController.navigate(route = OPEN_ITEM_SCREEN)
                             }
 
                         }
@@ -143,7 +145,8 @@ fun ListScreen(
                             modifier = Modifier.fieldModifier(),
                             price = item.price
                         ) {
-                            navController.navigate(route = OPEN_ITEM_SCREEN + "/${item.id}")
+                            viewModel.setData(item)
+                            navController.navigate(route = OPEN_ITEM_SCREEN)
                         }
                     }
                 }
