@@ -15,6 +15,9 @@ interface GetDataApi {
     @GET("/products/search")
     suspend fun getProductsSearch(@Query("q") search:String): Response<Products>
 
+    @GET("/products/categories")
+    suspend fun getCategories(): Response<Products>
+
 //    @GET("/api/materials")
 //    suspend fun getMaterials(@Header("Authorization") token:String,@Query("search") search:String): Response<Materials>
 //

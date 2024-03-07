@@ -12,6 +12,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,6 +29,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.NavController
 import com.example.vktask.OPEN_ITEM_SCREEN
 import com.example.vktask.common.composable.CustomLinearProgressBar
+import com.example.vktask.common.composable.FABTaskComposable
 import com.example.vktask.common.composable.ProductCard
 import com.example.vktask.common.ext.fieldModifier
 import com.example.vktask.data.Products
@@ -38,7 +40,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-@SuppressLint("CoroutineCreationDuringComposition")
+@SuppressLint("CoroutineCreationDuringComposition", "UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListScreen(
@@ -52,6 +54,7 @@ fun ListScreen(
     val isLoading by listViewModel.isLoading.collectAsState()
     val dataList by listViewModel.dataListProduct.collectAsState()
     val dataListSearch by listViewModel.dataListProductSearch.collectAsState()
+    val isDialogOpen = remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         withContext(Dispatchers.IO) {
             if (dataList.isEmpty()) {
@@ -64,81 +67,102 @@ fun ListScreen(
             }
         }
     }
-    Column(
-        modifier = modifier
-            .fillMaxSize(),
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        val searchText = remember { mutableStateOf("") }
-        SearchBar(
-            modifier = Modifier.fieldModifier(),
-            query = searchText.value,
-            onQueryChange = { text ->
-                searchText.value = text
-            },
-            onSearch = {
-                Log.d("searchText.value", searchText.value)
-                listViewModel.getListProductsWithRetry(
-                    searchText.value,
-                    0,20,
-                    context,
-                    true
-                )
 
-            },
-            placeholder = {
-                Text(text = "Search...")
-            },
-            active = isActiveSearch.value,
-            onActiveChange = {
-                isActiveSearch.value = it
-            }) {
-            LazyColumn {
-                items(dataListSearch) { item ->
-                    ProductCard(
-                        content = item.title,
-                        imgUrl=item.thumbnail,
-                        modifier=Modifier.fieldModifier(),
-                        price = item.price,
-                        description = item.description
-                    ){
-                        navController.navigate(route = OPEN_ITEM_SCREEN + "/${item.id}")
+    Scaffold(
+        floatingActionButton = {
+            FABTaskComposable(
+                onCancelFilter = { isDialogOpen.value =true })
+        },
+        content = {
+
+            Column(
+                modifier = modifier
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                val searchText = remember { mutableStateOf("") }
+                SearchBar(
+                    modifier = Modifier.fieldModifier(),
+                    query = searchText.value,
+                    onQueryChange = { text ->
+                        searchText.value = text
+                    },
+                    onSearch = {
+                        Log.d("searchText.value", searchText.value)
+                        listViewModel.getListProductsWithRetry(
+                            searchText.value,
+                            0, 20,
+                            context,
+                            true
+                        )
+
+                    },
+                    placeholder = {
+                        Text(text = "Search...")
+                    },
+                    active = isActiveSearch.value,
+                    onActiveChange = {
+                        isActiveSearch.value = it
+                    }) {
+                    LazyColumn {
+                        items(dataListSearch) { item ->
+                            ProductCard(
+                                content = item.title,
+                                imgUrl = item.thumbnail,
+                                modifier = Modifier.fieldModifier(),
+                                price = item.price,
+                                description = item.description
+                            ) {
+                                navController.navigate(route = OPEN_ITEM_SCREEN + "/${item.id}")
+                            }
+
+                        }
+                    }
+                }
+
+                if (isLoading) {
+                    Column(
+                        modifier = modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        CustomLinearProgressBar(Modifier.fieldModifier())
                     }
 
                 }
-            }
-        }
 
-            if (isLoading) {
-                Column(
-                    modifier = modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    CustomLinearProgressBar(Modifier.fieldModifier())
-                }
-
-            }
-
-            LazyColumn {
-                items(dataList) { item ->
-                    ProductCard(
-                        content = item.title,
-                        imgUrl=item.thumbnail,
-                        description = item.description,
-                        modifier=Modifier.fieldModifier(),
-                        price = item.price
-                    ){
-                        navController.navigate(route = OPEN_ITEM_SCREEN + "/${item.id}")
+                LazyColumn {
+                    items(dataList) { item ->
+                        ProductCard(
+                            content = item.title,
+                            imgUrl = item.thumbnail,
+                            description = item.description,
+                            modifier = Modifier.fieldModifier(),
+                            price = item.price
+                        ) {
+                            navController.navigate(route = OPEN_ITEM_SCREEN + "/${item.id}")
+                        }
                     }
                 }
             }
+        })
 
-
+    if (isDialogOpen.value) {
+//        FilterDialogTask(
+//            message = "Choose categories",
+//            status = uiStateFilter.filterStatusTask,
+//            onNewValueStatusFilter=filterViewModel::onNewValueStatusFilter,
+//            modifier = Modifier.fieldModifier(),
+//            onCancel = { isDialogOpen.value = false },
+//            color = MaterialTheme.colorScheme.background
+//        )
     }
+
+
+
 
     listViewModel.productsState.observe(lifecycleOwner) { state ->
         Log.d("start", state.toString())
