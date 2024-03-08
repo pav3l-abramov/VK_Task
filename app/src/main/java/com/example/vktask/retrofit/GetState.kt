@@ -1,6 +1,5 @@
 package com.example.vktask.retrofit
 
-import com.example.vktask.data.CategoriesData
 import com.example.vktask.data.Products
 
 

@@ -5,7 +5,6 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.example.vktask.data.Product
-import com.example.vktask.retrofit.AppRetrofit
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 

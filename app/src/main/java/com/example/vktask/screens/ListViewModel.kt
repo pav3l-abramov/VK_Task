@@ -47,7 +47,6 @@ class ListViewModel  @Inject constructor(
             getListProducts(searchText,skip,limit,context,status)
         } catch (e: Exception) {
             // Handle the error and retry the request if necessary
-            //getListTasks(tokenUser,context)
         }
     }
 
@@ -65,8 +64,6 @@ class ListViewModel  @Inject constructor(
                     2-> if(uiStateCurrentState.value.categories!="all") mainApi.getProductsByCategory(uiStateCurrentState.value.categories) else mainApi.getProducts(skip,limit)
                     else -> {mainApi.getProducts(skip,limit)}
                 }
-
-//                    if (onSearch) mainApi.getProductsSearch(searchText)  else mainApi.getProducts(skip,limit)
                 if (response.isSuccessful) {
                     _isLoading.value = false
                     Log.d("getListTasks", "4")
