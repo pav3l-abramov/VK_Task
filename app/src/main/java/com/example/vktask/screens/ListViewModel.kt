@@ -23,6 +23,10 @@ import javax.inject.Inject
 class ListViewModel  @Inject constructor(
     private val appRetrofit: AppRetrofit
 ) : ViewModel() {
+
+    var uiStateCurrentState = mutableStateOf(StateListUI())
+        private set
+
     val mainApi = appRetrofit.retrofit.create(GetDataApi::class.java)
     var uiCheckStatus = mutableStateOf(StatusUI())
     private val _productsState = MutableLiveData<GetStateList>()
@@ -38,9 +42,9 @@ class ListViewModel  @Inject constructor(
     val isLoading = _isLoading.asStateFlow()
 
 
-    fun getListProductsWithRetry(searchText:String, skip: Int,limit:Int , context: Context, onSearch:Boolean) {
+    fun getListProductsWithRetry(searchText:String, skip: Int,limit:Int , context: Context, status:Int) {
         try {
-            getListProducts(searchText,skip,limit,context,onSearch)
+            getListProducts(searchText,skip,limit,context,status)
         } catch (e: Exception) {
             // Handle the error and retry the request if necessary
             //getListTasks(tokenUser,context)
@@ -48,20 +52,27 @@ class ListViewModel  @Inject constructor(
     }
 
 
-    private fun getListProducts(searchText:String, skip: Int,limit:Int , context: Context, onSearch:Boolean) {
+    private fun getListProducts(searchText:String, skip: Int,limit:Int , context: Context, status:Int) {
         viewModelScope.launch {
             _isLoading.value = true
             _productsState.value = GetStateList.Loading
             uiCheckStatus.value = StatusUI("Loading", "Loading")
             try {
                 Log.d("getListTasks", "3")
-                val response = if (onSearch) mainApi.getProductsSearch(searchText)  else mainApi.getProducts(skip,limit)
+                val response = when(status){
+                    0 ->mainApi.getProducts(skip,limit)
+                    1->mainApi.getProductsSearch(searchText)
+                    2-> if(uiStateCurrentState.value.categories!="all") mainApi.getProductsByCategory(uiStateCurrentState.value.categories) else mainApi.getProducts(skip,limit)
+                    else -> {mainApi.getProducts(skip,limit)}
+                }
+
+//                    if (onSearch) mainApi.getProductsSearch(searchText)  else mainApi.getProducts(skip,limit)
                 if (response.isSuccessful) {
                     _isLoading.value = false
                     Log.d("getListTasks", "4")
                     uiCheckStatus.value = StatusUI("Success", "Success")
                     val products = response.body()
-                    _productsState.value = products?.let { GetStateList.Success(it,onSearch) }
+                    _productsState.value = products?.let { GetStateList.Success(it,status) }
                 } else {
                     _isLoading.value = false
                     Toast.makeText(
@@ -94,11 +105,15 @@ class ListViewModel  @Inject constructor(
     }
     fun setDataList(state: GetStateList.Success){
         val products= state.products.products
-        if (state.onSearch){
-            _dataListProductSearch.value=products
-        }
-        else {
-            _dataListProduct.value = products
+        when(state.status){
+            0,2 -> _dataListProduct.value = products
+            1 ->_dataListProductSearch.value=products
         }
     }
+
+    fun onNewValueCategories(newValue: String) {
+        uiStateCurrentState.value = uiStateCurrentState.value.copy(categories  = newValue)
+        uiStateCurrentState.value = uiStateCurrentState.value.copy(page  = 1)
+    }
+
 }

@@ -68,6 +68,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.example.vktask.common.ext.fieldModifier
+import com.example.vktask.data.DataToItemScreen
 import com.example.vktask.data.Product
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -179,24 +180,19 @@ private fun TaskCardMain(
     }
 }
 
-data class dataToItemScreen(
-    val name : String,
-    val properties : String
-)
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CardDetail(
     product: Product
 ) {
     val listItemProduct = listOf(
-        dataToItemScreen("Description: ", product.description),
-        dataToItemScreen("Price: ", product.price.toString()),
-        dataToItemScreen("Discount: ", product.discountPercentage.toString()),
-        dataToItemScreen("Rating: ", product.rating.toString()),
-        dataToItemScreen("Stock: ", product.stock.toString()),
-        dataToItemScreen("Brand: ", product.brand.toString()),
-        dataToItemScreen("Category: ", product.category.toString())
+        DataToItemScreen("Description: ", product.description),
+        DataToItemScreen("Price: ", product.price.toString()),
+        DataToItemScreen("Discount: ", product.discountPercentage.toString()),
+        DataToItemScreen("Rating: ", product.rating.toString()),
+        DataToItemScreen("Stock: ", product.stock.toString()),
+        DataToItemScreen("Brand: ", product.brand.toString()),
+        DataToItemScreen("Category: ", product.category.toString())
     )
     Column(Modifier.fillMaxSize()) {
         Card(

@@ -16,8 +16,11 @@ interface GetDataApi {
     @GET("/products/search")
     suspend fun getProductsSearch(@Query("q") search:String): Response<Products>
 
+    @GET("/products/category/{category}")
+    suspend fun getProductsByCategory(@Path("category") category:String): Response<Products>
+
     @GET("/products/categories")
-    suspend fun getCategories(): Response<CategoriesData>
+    suspend fun getCategories(): Response<MutableList<String>>
 
 }
 

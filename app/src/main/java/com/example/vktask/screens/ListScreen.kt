@@ -28,11 +28,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.NavController
 import com.example.vktask.OPEN_ITEM_SCREEN
+import com.example.vktask.common.composable.CategoriesDialog
 import com.example.vktask.common.composable.CustomLinearProgressBar
 import com.example.vktask.common.composable.FABTaskComposable
 import com.example.vktask.common.composable.ProductCard
 import com.example.vktask.common.ext.fieldModifier
 import com.example.vktask.data.Products
+import com.example.vktask.retrofit.GetStateCategories
 import com.example.vktask.retrofit.GetStateList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -48,13 +50,16 @@ fun ListScreen(
     modifier: Modifier = Modifier,
     context: Context,
     listViewModel: ListViewModel= hiltViewModel(),
+    categoriesViewModel: CategoriesViewModel= hiltViewModel(),
     viewModel : SharedViewModel
 ) {
     val isActiveSearch = remember { mutableStateOf(false) }
     val lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current
     val isLoading by listViewModel.isLoading.collectAsState()
     val dataList by listViewModel.dataListProduct.collectAsState()
+    val categoriesList by categoriesViewModel.dataListCategories.collectAsState()
     val dataListSearch by listViewModel.dataListProductSearch.collectAsState()
+    val uiStateCurrentState by listViewModel.uiStateCurrentState
     val isDialogOpen = remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         withContext(Dispatchers.IO) {
@@ -63,10 +68,16 @@ fun ListScreen(
                     "",
                     0, 20,
                     context,
-                    false
+                    0
                 )
             }
         }
+        if (categoriesList.isEmpty()) {
+            categoriesViewModel.getListCategoriesWithRetry(
+                context
+            )
+        }
+
     }
 
     Scaffold(
@@ -95,7 +106,7 @@ fun ListScreen(
                             searchText.value,
                             0, 20,
                             context,
-                            true
+                            1
                         )
 
                     },
@@ -154,14 +165,16 @@ fun ListScreen(
         })
 
     if (isDialogOpen.value) {
-//        FilterDialogTask(
-//            message = "Choose categories",
-//            status = uiStateFilter.filterStatusTask,
-//            onNewValueStatusFilter=filterViewModel::onNewValueStatusFilter,
-//            modifier = Modifier.fieldModifier(),
-//            onCancel = { isDialogOpen.value = false },
-//            color = MaterialTheme.colorScheme.background
-//        )
+        CategoriesDialog(
+            message = "Choose category",
+            status = uiStateCurrentState.categories,
+            listStatus = categoriesList,
+            onNewValueCategories=listViewModel::onNewValueCategories,
+            onOkButton= { listViewModel.getListProductsWithRetry("",0,20,context,2) },
+            modifier = Modifier.fieldModifier(),
+            onCancel = { isDialogOpen.value = false },
+            color = MaterialTheme.colorScheme.background
+        )
     }
 
 
@@ -185,6 +198,28 @@ fun ListScreen(
                 //mainViewModel.handleErrorStateMaterialsScreen(state)
                 val error = state.error
                 listViewModel.typeError(error)
+            }
+        }
+    }
+
+    categoriesViewModel.categoriesState.observe(lifecycleOwner) { state ->
+        Log.d("start", state.toString())
+        when (state) {
+            GetStateCategories.Loading -> {
+                Log.d("Loading", state.toString())
+            }
+
+            is GetStateCategories.Success -> {
+                CoroutineScope(Job()).launch {
+                    //mainViewModel.handleSuccessStateMaterialScreen(state)
+                    categoriesViewModel.setDataList(state)
+                }
+            }
+
+            is GetStateCategories.Error -> {
+                //mainViewModel.handleErrorStateMaterialsScreen(state)
+                val error = state.error
+                categoriesViewModel.typeError(error)
             }
         }
     }

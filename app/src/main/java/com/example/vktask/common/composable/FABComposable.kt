@@ -23,7 +23,6 @@ fun FABTaskComposable(
         horizontalAlignment = Alignment.End
     ) {
         FloatingActionButton(
-            shape = CircleShape,
             onClick = { onCancelFilter() },
             content = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -32,11 +31,7 @@ fun FABTaskComposable(
                         contentDescription = null
                     )
                 }
-
-            },
-            modifier = Modifier
-                .size(55.dp)
-
+            }
         )
     }
 }
