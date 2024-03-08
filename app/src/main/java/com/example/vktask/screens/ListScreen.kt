@@ -198,13 +198,11 @@ fun ListScreen(
 
             is GetStateList.Success -> {
                 CoroutineScope(Job()).launch {
-                    //mainViewModel.handleSuccessStateMaterialScreen(state)
                     listViewModel.setDataList(state)
                 }
             }
 
             is GetStateList.Error -> {
-                //mainViewModel.handleErrorStateMaterialsScreen(state)
                 val error = state.error
                 listViewModel.typeError(error)
             }
@@ -220,13 +218,11 @@ fun ListScreen(
 
             is GetStateCategories.Success -> {
                 CoroutineScope(Job()).launch {
-                    //mainViewModel.handleSuccessStateMaterialScreen(state)
                     categoriesViewModel.setDataList(state)
                 }
             }
 
             is GetStateCategories.Error -> {
-                //mainViewModel.handleErrorStateMaterialsScreen(state)
                 val error = state.error
                 categoriesViewModel.typeError(error)
             }
