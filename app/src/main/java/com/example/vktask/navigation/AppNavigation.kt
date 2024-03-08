@@ -85,7 +85,7 @@ fun AppNavigation(context: Context) {
         ) {
 
             composable(route = BottomBarScreen.Home.route) {
-                HomeScreen()
+                HomeScreen( context = context)
 
             }
 
