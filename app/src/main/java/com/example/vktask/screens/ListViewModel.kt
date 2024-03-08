@@ -111,9 +111,9 @@ class ListViewModel  @Inject constructor(
         }
     }
 
-    fun onNewValueCategories(newValue: String) {
-        uiStateCurrentState.value = uiStateCurrentState.value.copy(categories  = newValue)
-        uiStateCurrentState.value = uiStateCurrentState.value.copy(page  = 1)
+    fun onNewValueCategories(newValueCategories: String, newValuePage:Int) {
+        uiStateCurrentState.value = uiStateCurrentState.value.copy(categories  = newValueCategories)
+        uiStateCurrentState.value = uiStateCurrentState.value.copy(page  = newValuePage)
     }
 
 }

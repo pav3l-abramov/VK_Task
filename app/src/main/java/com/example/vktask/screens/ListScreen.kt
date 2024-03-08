@@ -33,7 +33,6 @@ import com.example.vktask.common.composable.CustomLinearProgressBar
 import com.example.vktask.common.composable.FABTaskComposable
 import com.example.vktask.common.composable.ProductCard
 import com.example.vktask.common.ext.fieldModifier
-import com.example.vktask.data.Products
 import com.example.vktask.retrofit.GetStateCategories
 import com.example.vktask.retrofit.GetStateList
 import kotlinx.coroutines.CoroutineScope
@@ -61,6 +60,7 @@ fun ListScreen(
     val dataListSearch by listViewModel.dataListProductSearch.collectAsState()
     val uiStateCurrentState by listViewModel.uiStateCurrentState
     val isDialogOpen = remember { mutableStateOf(false) }
+    val isMainFABOpen = remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         withContext(Dispatchers.IO) {
             if (dataList.isEmpty()) {
@@ -83,7 +83,16 @@ fun ListScreen(
     Scaffold(
         floatingActionButton = {
             FABTaskComposable(
-                onCancelFilter = { isDialogOpen.value =true })
+                onCancelMain = { isMainFABOpen.value=!isMainFABOpen.value },
+                onCancelPageUp = listViewModel::onNewValueCategories ,
+                onCancelPageDown = listViewModel::onNewValueCategories,
+                onButton= { listViewModel.getListProductsWithRetry("",(uiStateCurrentState.page-1)*20,20,context,0) },
+                onCancelCategories = { isDialogOpen.value =true },
+                mainButtonOn = isMainFABOpen.value,
+                currentPage = uiStateCurrentState.page,
+                color = MaterialTheme.colorScheme.background,
+                pageIsEmpty = dataList.isNotEmpty()
+            )
         },
         content = {
 

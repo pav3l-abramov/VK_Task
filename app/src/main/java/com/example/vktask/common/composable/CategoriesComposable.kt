@@ -36,7 +36,7 @@ fun CategoriesDialog(
     message: String,
     status: String,
     listStatus: List<String>,
-    onNewValueCategories: (String) -> Unit,
+    onNewValueCategories: (String, Int) -> Unit,
     onCancel: () -> Unit,
     onOkButton: () -> Unit,
     modifier: Modifier = Modifier,
@@ -88,7 +88,7 @@ fun CategoriesDialog(
                                     DropdownMenuItem(
                                         text = { Text(text = item) },
                                         onClick = {
-                                            onNewValueCategories(item)
+                                            onNewValueCategories(item,1)
                                             expanded = false
                                         }
                                     )
